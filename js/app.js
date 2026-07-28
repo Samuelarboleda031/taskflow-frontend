@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // --- CONFIGURACIÓN & VARIABLES DE ENTORNO ---
   // Buscamos la URL de la API. Puede estar definida en window.API_URL (inyectada por el despliegue)
   // o utilizar el valor local por defecto.
-  const API_URL = window.API_URL || "http://localhost:5000";
+  const API_URL = window.API_URL || "https://taskflow-backend-production-bda5.up.railway.app";
 
   // Estado global de la aplicación
   let tasks = [];
