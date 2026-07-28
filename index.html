@@ -12,6 +12,13 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <!-- Stylesheet -->
   <link rel="stylesheet" href="css/styles.css">
+  <!-- Anti-flash: aplica el tema guardado antes del primer render -->
+  <script>
+    (function() {
+      const saved = localStorage.getItem('tf-theme');
+      if (saved === 'light') document.documentElement.setAttribute('data-theme', 'light');
+    })();
+  </script>
 </head>
 <body>
   <!-- Fondo con degradado ambiental y partículas sutiles de fondo -->
@@ -32,6 +39,12 @@
       </div>
 
       <div class="header-status">
+        <!-- Toggle Modo Claro/Oscuro -->
+        <button id="theme-toggle" class="theme-toggle" aria-label="Cambiar tema" title="Cambiar tema">
+          <i class="fa-solid fa-sun icon-sun"></i>
+          <i class="fa-solid fa-moon icon-moon"></i>
+        </button>
+
         <!-- Indicador de Conexión a la API -->
         <div id="connection-status" class="status-badge checking">
           <span class="status-dot"></span>

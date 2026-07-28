@@ -57,8 +57,26 @@ document.addEventListener('DOMContentLoaded', () => {
   initApp();
 
   function initApp() {
+    setupThemeToggle();
     setupEventListeners();
     checkApiConnection();
+  }
+
+  // --- TEMA CLARO / OSCURO ---
+  function setupThemeToggle() {
+    const toggleBtn = document.getElementById('theme-toggle');
+    if (!toggleBtn) return;
+
+    toggleBtn.addEventListener('click', () => {
+      const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+      if (isLight) {
+        document.documentElement.removeAttribute('data-theme');
+        localStorage.setItem('tf-theme', 'dark');
+      } else {
+        document.documentElement.setAttribute('data-theme', 'light');
+        localStorage.setItem('tf-theme', 'light');
+      }
+    });
   }
 
   // --- EVENT LISTENERS ---
