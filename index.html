@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TaskFlow // Gestor de Tareas & Prioridades</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <!-- Fondo con degradado ambiental y partículas sutiles de fondo -->
+  <div class="ambient-glow"></div>
+  <div class="ambient-glow secondary"></div>
+
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-logo">
+        <div class="logo-icon">
+          <i class="fa-solid fa-circle-nodes"></i>
+        </div>
+        <div class="logo-text">
+          <h1>Task<span>Flow</span></h1>
+          <p>Gestor de Tareas & Prioridades</p>
+        </div>
+      </div>
+
+      <div class="header-status">
+        <!-- Indicador de Conexión a la API -->
+        <div id="connection-status" class="status-badge checking">
+          <span class="status-dot"></span>
+          <span class="status-text">Verificando API...</span>
+        </div>
+
+        <!-- Contador de Tareas Pendientes -->
+        <div class="counter-badge">
+          <span class="counter-label">Pendientes</span>
+          <span id="pending-counter" class="counter-value">0</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content Grid -->
+    <main class="app-main-grid">
+      <!-- Columna Izquierda: Formulario de Creación -->
+      <section class="form-section">
+        <div class="glass-card form-card">
+          <h2 class="card-title">
+            <i class="fa-solid fa-plus-circle"></i>
+            Nueva Tarea
+          </h2>
+          <p class="card-subtitle">Registra una tarea y asígnale prioridad.</p>
+
+          <form id="task-form" novalidate>
+            <!-- Error Alert General -->
+            <div id="form-error-alert" class="alert-message error hidden">
+              <i class="fa-solid fa-circle-exclamation"></i>
+              <span class="alert-text">Error message here.</span>
+            </div>
+
+            <!-- Título de Tarea -->
+            <div class="input-group">
+              <label for="task-title">Título <span class="required">*</span></label>
+              <div class="input-wrapper">
+                <i class="fa-solid fa-heading input-icon"></i>
+                <input 
+                  type="text" 
+                  id="task-title" 
+                  name="title" 
+                  placeholder="Ej. Comprar suministros" 
+                  required
+                  minlength="3"
+                >
+              </div>
+              <span class="input-validation-msg" id="title-validation-msg"></span>
+            </div>
+
+            <!-- Descripción (Opcional) -->
+            <div class="input-group">
+              <label for="task-desc">Descripción <span class="optional">(Opcional)</span></label>
+              <div class="input-wrapper">
+                <i class="fa-solid fa-align-left input-icon textarea-icon"></i>
+                <textarea 
+                  id="task-desc" 
+                  name="description" 
+                  placeholder="Detalles adicionales sobre la tarea..."
+                  rows="3"
+                ></textarea>
+              </div>
+            </div>
+
+            <!-- Prioridad Selector (Chips Interactivos) -->
+            <div class="input-group">
+              <label>Prioridad <span class="required">*</span></label>
+              <div class="priority-chips" role="radiogroup" aria-label="Nivel de Prioridad">
+                <button type="button" class="priority-chip low" data-priority="Baja" role="radio" aria-checked="false">
+                  <span class="chip-indicator"></span>
+                  Baja
+                </button>
+                <button type="button" class="priority-chip medium" data-priority="Media" role="radio" aria-checked="false">
+                  <span class="chip-indicator"></span>
+                  Media
+                </button>
+                <button type="button" class="priority-chip high" data-priority="Alta" role="radio" aria-checked="false">
+                  <span class="chip-indicator"></span>
+                  Alta
+                </button>
+              </div>
+              <!-- Campo oculto para persistir el valor en el submit -->
+              <input type="hidden" id="task-priority" name="priority" value="" required>
+              <span class="input-validation-msg" id="priority-validation-msg"></span>
+            </div>
+
+            <!-- Botón de Envío -->
+            <button type="submit" id="submit-btn" class="btn btn-primary">
+              <span class="btn-text">Agregar Tarea</span>
+              <span class="btn-icon"><i class="fa-solid fa-arrow-right"></i></span>
+            </button>
+          </form>
+        </div>
+      </section>
+
+      <!-- Columna Derecha: Filtros y Lista de Tareas -->
+      <section class="list-section">
+        <!-- Control de Filtros -->
+        <div class="filter-wrapper">
+          <div class="filter-header">
+            <h3><i class="fa-solid fa-list-check"></i> Listado de Tareas</h3>
+          </div>
+          <div class="filter-control" id="priority-filter-control">
+            <button type="button" class="filter-btn active" data-filter="Todas">Todas</button>
+            <button type="button" class="filter-btn" data-filter="Alta">Alta</button>
+            <button type="button" class="filter-btn" data-filter="Media">Media</button>
+            <button type="button" class="filter-btn" data-filter="Baja">Baja</button>
+          </div>
+        </div>
+
+        <!-- Contenedor Principal de la Lista -->
+        <div class="list-container">
+          <!-- Spinner de Carga -->
+          <div id="list-loader" class="loader-container">
+            <div class="custom-spinner"></div>
+            <p>Cargando tareas...</p>
+          </div>
+
+          <!-- Mensaje de Error de Red / Carga -->
+          <div id="list-error" class="error-container hidden">
+            <div class="error-illustration">
+              <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h4>Error de Conexión</h4>
+            <p id="list-error-msg">No se pudo establecer comunicación con el servidor de la API.</p>
+            <button type="button" id="retry-btn" class="btn btn-secondary">
+              <i class="fa-solid fa-rotate-right"></i> Reintentar conexión
+            </button>
+          </div>
+
+          <!-- Lista de Tareas Real -->
+          <div id="task-list" class="task-list-items hidden">
+            <!-- Las tareas se inyectarán dinámicamente mediante JS -->
+          </div>
+
+          <!-- Estado Vacío (Empty State) -->
+          <div id="empty-state" class="empty-state hidden">
+            <div class="empty-illustration">
+              <i class="fa-solid fa-clipboard-check"></i>
+            </div>
+            <h4 id="empty-title">¡Todo listo!</h4>
+            <p id="empty-description">No tienes tareas pendientes en esta categoría.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Contenedor de Toasts (Notificaciones flotantes) -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- JavaScript -->
+  <script src="js/app.js"></script>
+</body>
+</html>
